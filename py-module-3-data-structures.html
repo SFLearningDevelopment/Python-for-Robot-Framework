@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<!-- ============================================================================
+     SF KNOWLEDGE HUB — Python for Robot Framework
+     Module 1 — Setup and the Python↔Robot bridge
+     EXAMPLE_ID = py-module-1-setup-and-bridge  (filename minus .html)
+     courseId   = ct52RngFePXF4BwHJ9mC
+     ============================================================================ -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 3 — Data structures and test data — Python for Robot Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#1a6eb5; --blue-dark:#0f4c81; --ink:#1f2933; --muted:#647687;
+    --bg:#eef2f8; --card:#ffffff; --border:#d6e0ee; --green:#16a34a; --coral:#c0392b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Source Sans 3',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;font-size:17px}
+  .userbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:var(--card);border-bottom:1px solid var(--border);font-size:14px}
+  .signout{padding:8px 16px;border:none;border-radius:6px;background:var(--blue);color:#fff;cursor:pointer;font-family:inherit}
+  .crumbs{padding:14px 24px;color:var(--muted);font-size:13px}
+  .crumbs a{color:var(--blue);text-decoration:none}
+  .wrap{max-width:860px;margin:0 auto;padding:8px 24px 80px}
+  h1{font-family:'Source Serif 4',Georgia,serif;font-size:30px;margin:8px 0 4px}
+  h2{font-family:'Source Serif 4',Georgia,serif;font-size:22px;margin:26px 0 6px}
+  .eyebrow{font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+  .advisory{font-family:'Source Code Pro',monospace;font-size:12px;color:var(--muted);background:#f4f8fd;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:14px 0}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+  .tag{font-family:'Source Code Pro',monospace;font-size:12px;background:#e3edf9;color:var(--blue-dark);padding:5px 10px;border-radius:14px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;margin:18px 0}
+  code{font-family:'Source Code Pro',monospace;font-size:.92em;background:#eef2f8;padding:1px 5px;border-radius:4px}
+  pre{background:#0f1b2d;color:#e6edf5;border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.55}
+  pre .cmt{color:#7f9cc0}
+  pre .sec{color:#7ec4ff;font-weight:600}
+  .filelabel{font-family:'Source Code Pro',monospace;font-size:12px;color:var(--muted);margin:14px 0 -8px;text-transform:none}
+  /* Collapsible primer — "Refresh your knowledge?" */
+  .primer{border:1px solid var(--border);border-radius:12px;margin:18px 0;overflow:hidden}
+  .primer summary{cursor:pointer;padding:14px 18px;background:#f4f8fd;font-weight:600;color:var(--blue-dark);list-style:none}
+  .primer summary::-webkit-details-marker{display:none}
+  .primer summary::before{content:'+ ';font-family:'Source Code Pro',monospace}
+  .primer[open] summary::before{content:'– '}
+  .primer .primer-body{padding:0 18px 16px}
+  /* Keyword annotation list */
+  .kwlist{margin:12px 0 0}
+  .kwlist dt{margin-top:12px}
+  .kwlist dt code{background:#e3edf9;color:var(--blue-dark)}
+  .kwlist dd{margin:4px 0 0 0}
+  .kwlist .kw-ex{display:block;margin-top:5px;font-family:'Source Code Pro',monospace;font-size:13px;color:#e6edf5;background:#0f1b2d;border-radius:6px;padding:7px 10px;white-space:pre;overflow-x:auto}
+  /* MCQ */
+  .q{margin:16px 0}
+  .q .stem{font-weight:600;margin-bottom:8px}
+  .opt{display:block;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:8px 0;cursor:pointer}
+  .opt input{margin-right:10px}
+  .submit-btn{padding:11px 20px;border:none;border-radius:8px;background:var(--blue);color:#fff;font-family:inherit;font-size:15px;cursor:pointer}
+  .submit-btn:disabled{background:#c3d3e6;cursor:not-allowed}
+  .submit-note{font-family:'Source Code Pro',monospace;font-size:13px;color:var(--muted);margin-top:8px}
+  .hidden{display:none}
+  .complete-bar{display:flex;align-items:center;gap:12px;border-top:1px solid var(--border);margin-top:22px;padding-top:18px}
+  .complete-bar.disabled{opacity:.5}
+  .complete-bar .redo-btn{margin-left:auto;display:none;border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit}
+  .complete-bar .redo-btn.visible{display:inline-block}
+  .complete-bar.done{color:var(--green)}
+  .nav-row{display:flex;justify-content:space-between;margin-top:30px}
+  .nav-btn{padding:12px 18px;border-radius:8px;background:var(--blue);color:#fff;text-decoration:none;font-weight:600}
+  .nav-btn.secondary{background:#fff;color:var(--blue);border:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="userbar">
+  <span>Welcome, <span id="userEmail">…</span></span>
+  <button class="signout" onclick="pmSignOut()">Sign out</button>
+</div>
+<div class="crumbs">
+  <a href="course-map.html">Back to course dashboard</a> / Module 3 / Data structures and test data
+</div>
+
+<div class="wrap">
+  <div class="eyebrow">Module 3</div>
+  <h1>Data structures and test data</h1>
+  <div class="tags">
+    <span class="tag">lists</span>
+    <span class="tag">dictionaries</span>
+    <span class="tag">strings &amp; files</span>
+    <span class="tag">exceptions</span>
+  </div>
+
+  <div class="advisory">Examples run on Python 3.8+ with Robot Framework 7.4.2. Verify current versions on PyPI before installing.</div>
+
+  <div class="card">
+    <p>Real tests move data around: a list of expected rows, a dictionary that looks like an API response, a data file that drives many cases, and an error that should fail a test cleanly. This module covers the four Python data structures a tester reaches for most, each shown feeding a Robot test. Keep a <code>.py</code> library and a <code>.robot</code> test side by side in one folder, as before.</p>
+  </div>
+
+  <!-- ===== CONCEPT 1: lists ============================================ -->
+  <h2>Lists</h2>
+  <p>A list is an ordered collection you can index and slice. Python indexes from <code>0</code>, so <code>items[0]</code> is the first element. A keyword that returns a list hands Robot a list it can index with <code>${result}[0]</code>.</p>
+
+  <div class="filelabel">DataLibrary.py</div>
+<pre>def top_three(scores):
+    <span class="cmt"># Sort highest-first and return the first three.</span>
+    numbers = [int(s) for s in scores]
+    numbers.sort(reverse=True)
+    return numbers[:3]</pre>
+
+  <div class="filelabel">data_tests.robot</div>
+<pre><span class="sec">*** Settings ***</span>
+Library           DataLibrary.py
+
+<span class="sec">*** Test Cases ***</span>
+Top Three Scores Are Returned
+    ${scores}=    Create List    40    90    75    10    88
+    ${top}=    Top Three    ${scores}
+    Should Be Equal As Integers    ${top}[0]    90
+    Length Should Be    ${top}    3</pre>
+
+  <p>The slice <code>numbers[:3]</code> takes the first three items; the test reads the highest with <code>${top}[0]</code> and checks the length with the built-in <code>Length Should Be</code>.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — what a collection is</summary>
+    <div class="primer-body">
+      <p>A collection holds multiple values in one object. A <strong>list</strong> is written with square brackets, <code>[10, 20, 30]</code>, keeps its items in order, and allows duplicates. You reach an item by position with <code>list[index]</code> (starting at <code>0</code>), and take a range with a <em>slice</em> like <code>list[:3]</code> (first three) or <code>list[1:]</code> (all but the first). Lists can grow with <code>.append(x)</code> and be ordered with <code>.sort()</code>.</p>
+    </div>
+  </details>
+
+  <!-- ===== CONCEPT 2: dictionaries ===================================== -->
+  <h2>Dictionaries</h2>
+  <p>A dictionary maps keys to values — ideal for modelling a JSON-like API response. You read a value by its key, and <code>.get()</code> lets you supply a fallback when a key might be missing. In Robot, a returned dict is accessed with <code>${response}[key]</code>.</p>
+
+  <div class="filelabel">DataLibrary.py  (add this)</div>
+<pre>def parse_user(record):
+    <span class="cmt"># record is a dict; .get() avoids a crash on a missing key.</span>
+    return {
+        "name": record.get("name", "unknown"),
+        "active": record.get("active", False),
+    }</pre>
+
+  <div class="filelabel">data_tests.robot  (add this)</div>
+<pre>Parse User Fills Missing Fields
+    ${record}=    Create Dictionary    name=Asha
+    ${user}=    Parse User    ${record}
+    Should Be Equal    ${user}[name]    Asha
+    Should Be Equal    ${user}[active]    ${False}</pre>
+
+  <p>The record has no <code>active</code> key, so <code>.get("active", False)</code> supplies the default. The test reads fields with <code>${user}[name]</code> — the same bracket access you use for lists, but keyed by name.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — key–value pairs</summary>
+    <div class="primer-body">
+      <p>A dictionary stores <strong>key–value pairs</strong>, written with braces: <code>{"name": "Asha", "active": True}</code>. Each key is unique and maps to one value. You read a value with <code>d["name"]</code>, but that raises an error if the key is absent; <code>d.get("name", default)</code> returns the default instead of failing. Dictionaries model structured records well, which is why API responses and config are so often dictionaries.</p>
+    </div>
+  </details>
+
+  <!-- ===== CONCEPT 3: strings and files ================================ -->
+  <h2>Strings and files</h2>
+  <p>Test data often arrives as text — a name to normalize, or a small data file that drives many cases. Python strings have handy methods (<code>.strip()</code>, <code>.upper()</code>, <code>.split()</code>), and f-strings build readable messages. Reading a file lets one keyword feed a data-driven suite.</p>
+
+  <div class="filelabel">users.csv</div>
+<pre>Asha,active
+Ben,inactive
+Chen,active</pre>
+
+  <div class="filelabel">DataLibrary.py  (add this)</div>
+<pre>def active_names(csv_path):
+    <span class="cmt"># Return the names whose status column is "active".</span>
+    names = []
+    with open(csv_path) as f:
+        for line in f:
+            name, status = line.strip().split(",")
+            if status == "active":
+                names.append(name)
+    return names</pre>
+
+  <div class="filelabel">data_tests.robot  (add this)</div>
+<pre>Active Names Are Extracted
+    ${names}=    Active Names    users.csv
+    Should Contain    ${names}    Asha
+    Should Not Contain    ${names}    Ben</pre>
+
+  <p><code>line.strip()</code> removes the trailing newline; <code>.split(",")</code> breaks each row into fields. The keyword returns only the active names, and the test asserts membership with <code>Should Contain</code>. Put <code>users.csv</code> in the same folder as the test.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — strings as sequences</summary>
+    <div class="primer-body">
+      <p>A string is a sequence of characters in quotes. Useful methods include <code>.strip()</code> (remove surrounding whitespace, including newlines), <code>.upper()</code>/<code>.lower()</code> (change case), and <code>.split(",")</code> (break into a list on a separator). An <strong>f-string</strong> like <code>f"Total: {amount}"</code> inserts a variable's value into text. Reading a file with <code>with open(path) as f:</code> gives you its lines to loop over, and the <code>with</code> block closes the file automatically when done.</p>
+    </div>
+  </details>
+
+  <!-- ===== CONCEPT 4: exceptions ======================================= -->
+  <h2>Exceptions: failing a test on purpose</h2>
+  <p>When input is invalid, a keyword should fail clearly rather than return a wrong answer. In Python you <code>raise</code> an exception; Robot Framework turns an unhandled exception into a failed keyword, with your message in the log. <code>try</code>/<code>except</code> lets you catch and reshape errors when you'd rather handle them.</p>
+
+  <div class="filelabel">DataLibrary.py  (add this)</div>
+<pre>def parse_positive_int(value):
+    number = int(value)          <span class="cmt"># raises ValueError on non-numeric text</span>
+    if number &lt;= 0:
+        raise ValueError(f"Expected a positive number, got {number}")
+    return number</pre>
+
+  <div class="filelabel">data_tests.robot  (add this)</div>
+<pre>Negative Input Fails The Keyword
+    Run Keyword And Expect Error    *positive number*    Parse Positive Int    -5
+
+Valid Input Returns The Number
+    ${n}=    Parse Positive Int    7
+    Should Be Equal As Integers    ${n}    7</pre>
+
+  <p>The first test uses <code>Run Keyword And Expect Error</code> to assert that a negative value <em>does</em> fail, matching part of the message. The second confirms a valid value returns normally. Raising an exception is how your Python signals a genuine failure to the test.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — what an error is</summary>
+    <div class="primer-body">
+      <p>An <strong>exception</strong> is Python's way of signalling that something went wrong, such as <code>ValueError</code> for a bad value. When code hits an unhandled exception, it stops and reports the error. You can trigger one deliberately with <code>raise ValueError("message")</code>, or catch one with <code>try:</code> / <code>except ValueError:</code> to handle it gracefully. In Robot Framework, an unhandled exception inside a keyword becomes a failed test step — which is exactly what you want when the input is invalid.</p>
+    </div>
+  </details>
+
+  <!-- ===== CHECK YOUR KNOWLEDGE (MCQ) =================================== -->
+  <div id="questionsWrap" class="card">
+    <div class="eyebrow">Check your knowledge</div>
+
+    <div class="q">
+      <div class="stem">Q1. In a Python list <code>items</code>, which expression gives the first element?</div>
+      <label class="opt"><input type="radio" name="q1" value="A"><code>items[1]</code></label>
+      <label class="opt"><input type="radio" name="q1" value="B"><code>items[0]</code></label>
+      <label class="opt"><input type="radio" name="q1" value="C"><code>items.first</code></label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q2. Why use <code>record.get("active", False)</code> instead of <code>record["active"]</code>?</div>
+      <label class="opt"><input type="radio" name="q2" value="A">It returns a default instead of raising an error when the key is missing</label>
+      <label class="opt"><input type="radio" name="q2" value="B">It is faster for every dictionary</label>
+      <label class="opt"><input type="radio" name="q2" value="C">Square-bracket access does not work on dictionaries</label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q3. What does <code>line.strip().split(",")</code> do to the row <code>"Asha,active\n"</code>?</div>
+      <label class="opt"><input type="radio" name="q3" value="A">Removes the newline and returns the list <code>["Asha", "active"]</code></label>
+      <label class="opt"><input type="radio" name="q3" value="B">Returns the single string <code>"Asha,active"</code></label>
+      <label class="opt"><input type="radio" name="q3" value="C">Raises an error because of the comma</label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q4. What happens in Robot Framework when a keyword's Python code hits an unhandled <code>raise ValueError(...)</code>?</div>
+      <label class="opt"><input type="radio" name="q4" value="A">The test step fails, with the message shown in the log</label>
+      <label class="opt"><input type="radio" name="q4" value="B">The value is silently returned as <code>None</code></label>
+      <label class="opt"><input type="radio" name="q4" value="C">Robot ignores it and the test passes</label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q5. Which Robot keyword asserts that a keyword fails with an expected error message?</div>
+      <label class="opt"><input type="radio" name="q5" value="A"><code>Should Be Equal</code></label>
+      <label class="opt"><input type="radio" name="q5" value="B"><code>Run Keyword And Expect Error</code></label>
+      <label class="opt"><input type="radio" name="q5" value="C"><code>Length Should Be</code></label>
+    </div>
+
+    <button class="submit-btn" id="submitAnswersBtn" disabled>Submit answers</button>
+    <div class="submit-note" id="submitNote">Select an answer for each question to submit.</div>
+  </div>
+
+  <div id="submittedWrap" class="card hidden">
+    <p>Answers submitted. Review complete — mark this module as complete below.</p>
+  </div>
+
+  <div class="complete-bar disabled" id="completeBar">
+    <input type="checkbox" id="completeCb" disabled>
+    <label for="completeCb" id="completeLabel">Answer all questions to unlock</label>
+    <button class="redo-btn" id="redoBtn">&#x21BA; Redo module</button>
+  </div>
+
+  <div class="nav-row">
+    <a class="nav-btn secondary" href="py-module-2-fundamentals-as-keywords.html">← Module 2</a>
+    <a class="nav-btn" href="py-module-4-custom-library-and-suite.html">Module 4 →</a>
+  </div>
+</div>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+/* ===== IDENTIFIERS — set at creation ====================================== */
+const EXAMPLE_ID = 'py-module-3-data-structures';   // = filename minus .html
+const CORRECT = { q1:'B', q2:'A', q3:'A', q4:'A', q5:'B' };
+
+/* ===== Firebase init ====================================================== */
+const _FB_CONFIG = {
+  apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain: "sfcertification-grafana.firebaseapp.com",
+  projectId: "sfcertification-grafana",
+  storageBucket: "sfcertification-grafana.firebasestorage.app",
+  messagingSenderId: "227322696511",
+  appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+if (!window._fbApp) window._fbApp = firebase.initializeApp(_FB_CONFIG);
+const _auth = firebase.auth(window._fbApp);
+window._learnerUid = 'anon'; window._learnerEmail = null;
+
+window.pmLearnerKey = function(exampleId){ return 'pm_learner_' + window._learnerUid + '_' + exampleId; };
+function loadState(){ try { return JSON.parse(localStorage.getItem(window.pmLearnerKey(EXAMPLE_ID))) || {}; } catch(e){ return {}; } }
+function saveState(s){ localStorage.setItem(window.pmLearnerKey(EXAMPLE_ID), JSON.stringify(s)); }
+
+window.pmSignOut = function(){ _auth.signOut(); };
+
+_auth.onAuthStateChanged(function(user){
+  if (user && user.email && user.email.endsWith('@sourcefuse.com')) {
+    window._learnerUid = user.uid; window._learnerEmail = user.email;
+    document.getElementById('userEmail').textContent = user.email;
+    document.dispatchEvent(new Event('learnerReady'));
+  } else if (user && user.email && !user.email.endsWith('@sourcefuse.com')) {
+    _auth.signOut();    // enforce domain
+  } else {
+    window.location.href = 'course-map.html';
+  }
+});
+
+/* ===== Page init — bind complete handler BEFORE early returns ============== */
+document.addEventListener('learnerReady', function() {
+  const state = loadState();
+  cpEnsureModuleStarted();
+
+  const completeCb = document.getElementById('completeCb');
+  if (completeCb) {
+    completeCb.addEventListener('change', function() {
+      if (!completeCb.checked) return;
+      const s = loadState(); s.complete = true; saveState(s);
+      activateCompleteBar(true);
+    });
+  }
+  const redoBtn = document.getElementById('redoBtn');
+  if (redoBtn) redoBtn.addEventListener('click', function() {
+    localStorage.removeItem(window.pmLearnerKey(EXAMPLE_ID));
+    document.getElementById('questionsWrap').classList.remove('hidden');
+    document.getElementById('submittedWrap').classList.add('hidden');
+    document.querySelectorAll('.opt input[type="radio"]').forEach(function(r){ r.checked = false; });
+    document.getElementById('submitAnswersBtn').disabled = true;
+    document.getElementById('submitNote').textContent = 'Select an answer for each question to submit.';
+    activateCompleteBar(false);
+  });
+
+  if (state.complete) { showSubmittedState(); activateCompleteBar(true); return; }
+  if (state.submittedAt) { showSubmittedState(); activateCompleteBar(false); return; }
+
+  document.querySelectorAll('.opt input[type="radio"]').forEach(function(radio){
+    radio.addEventListener('change', checkAllAnswered);
+  });
+  document.getElementById('submitAnswersBtn').addEventListener('click', submitAnswers);
+});
+
+const Q_NAMES = ['q1','q2','q3','q4','q5'];
+
+function checkAllAnswered() {
+  const all = Q_NAMES.every(n => document.querySelector('input[name="'+n+'"]:checked'));
+  document.getElementById('submitAnswersBtn').disabled = !all;
+  document.getElementById('submitNote').textContent = all ? 'Ready to submit.' : 'Select an answer for each question to submit.';
+}
+
+function submitAnswers() {
+  const answers = {};
+  Q_NAMES.forEach(function(n){
+    const v = document.querySelector('input[name="'+n+'"]:checked'); if (v) answers[n] = v.value;
+  });
+  let correct = 0;
+  Object.keys(CORRECT).forEach(function(n){ if (answers[n] === CORRECT[n]) correct++; });
+  const s = loadState();
+  s.exampleId = EXAMPLE_ID; s.answers = answers; s.correct = correct;
+  s.submittedAt = new Date().toISOString();
+  saveState(s);
+  showSubmittedState();
+  activateCompleteBar(false);
+}
+
+function showSubmittedState() {
+  document.getElementById('questionsWrap').classList.add('hidden');
+  document.getElementById('submittedWrap').classList.remove('hidden');
+}
+
+function activateCompleteBar(isDone) {
+  const bar = document.getElementById('completeBar');
+  const cb = document.getElementById('completeCb');
+  const label = document.getElementById('completeLabel');
+  const redo = document.getElementById('redoBtn');
+  if (!bar) return;
+  if (isDone) {
+    bar.className = 'complete-bar done';
+    cb.disabled = true; cb.checked = true;
+    label.textContent = '✓ Module complete';
+    if (redo) redo.classList.add('visible');
+    cpWriteModuleComplete();
+  } else {
+    bar.className = 'complete-bar';
+    cb.disabled = false; cb.checked = false;
+    label.textContent = 'Mark module as complete';
+    if (redo) redo.classList.remove('visible');
+  }
+}
+
+</script>
+
+<!-- ===== SHARED courseProgress v2 wiring ==================================== -->
+<script>
+/* --- CONFIG --- */
+var CP_COURSE_ID = 'ct52RngFePXF4BwHJ9mC';
+var THIS_MODULE_KEY = EXAMPLE_ID;
+var CP_MODULE_IDS = [
+  'py-module-1-setup-and-bridge',
+  'py-module-2-fundamentals-as-keywords',
+  'py-module-3-data-structures',
+  'py-module-4-custom-library-and-suite'
+];
+
+/* --- function bodies from courseProgress-v2.js --- */
+function cpNow() {
+  var d = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return {
+    date: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),
+    time: pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),
+    ms:   d.getTime()
+  };
+}
+function cpFmtDuration(ms) {
+  if (ms == null || ms < 0) return null;
+  var s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  if (h > 0) return h+'h '+m+'m '+sec+'s';
+  if (m > 0) return m+'m '+sec+'s';
+  return sec+'s';
+}
+function cpDb() { return firebase.firestore(window._fbApp); }
+function cpDocRef() { return cpDb().collection('courseProgress').doc(window._learnerUid); }
+function cpReady() { return window._fbApp && window._learnerUid && window._learnerUid !== 'anon'; }
+
+function cpEnsureModuleStarted() {
+  if (!cpReady()) return;
+  var ref = cpDocRef();
+  ref.get().then(function(snap){
+    var data = snap.exists ? (snap.data() || {}) : {};
+    var course = (data.courses && data.courses[CP_COURSE_ID]) || {};
+    var mods = course.modules || {};
+    var t = cpNow();
+    var update = { email: window._learnerEmail || null, name: window._learnerEmail || null, courses: {} };
+    update.courses[CP_COURSE_ID] = { moduleInProgress: THIS_MODULE_KEY, modules: {} };
+    if (!mods[THIS_MODULE_KEY] || !mods[THIS_MODULE_KEY].startedOn) {
+      update.courses[CP_COURSE_ID].modules[THIS_MODULE_KEY] = { startedOn: t.date, startedAt: t.time };
+    }
+    if (!course.courseStartedOn) { update.courses[CP_COURSE_ID].courseStartedOn = t.date; update.courses[CP_COURSE_ID].courseStartedAt = t.time; }
+    ref.set(update, { merge: true })
+       .catch(function(e){ console.warn('[courseProgress] start write failed:', e.message); });
+  }).catch(function(e){ console.warn('[courseProgress] start read failed:', e.message); });
+}
+
+function cpWriteModuleComplete() {
+  if (!cpReady()) return;
+  var ref = cpDocRef();
+  ref.get().then(function(snap){
+    var data = snap.exists ? (snap.data() || {}) : {};
+    var course = (data.courses && data.courses[CP_COURSE_ID]) || {};
+    var mods = course.modules || {};
+    var t = cpNow();
+    var startMs = null;
+    var mEntry = mods[THIS_MODULE_KEY];
+    if (mEntry && mEntry.startedOn && mEntry.startedAt) {
+      startMs = new Date(mEntry.startedOn + 'T' + mEntry.startedAt).getTime();
+    }
+    var moduleTimeTaken = startMs != null ? cpFmtDuration(t.ms - startMs) : null;
+
+    var courseUpdate = { modules: {} };
+    var existing = mods[THIS_MODULE_KEY] || {};
+    courseUpdate.modules[THIS_MODULE_KEY] = {
+      completedOn: existing.completedOn || t.date,
+      completedAt: existing.completedAt || t.time,
+      timeTaken:   existing.timeTaken   || moduleTimeTaken
+    };
+    if (course.moduleInProgress === THIS_MODULE_KEY) courseUpdate.moduleInProgress = null;
+
+    var completedCount = 0;
+    CP_MODULE_IDS.forEach(function(id){
+      if (id === THIS_MODULE_KEY) { completedCount++; return; }
+      if (mods[id] && mods[id].completedOn) completedCount++;
+    });
+    if (completedCount >= CP_MODULE_IDS.length && !course.courseCompletedOn) {
+      courseUpdate.courseCompletedOn = t.date;
+      courseUpdate.courseCompletedAt = t.time;
+      if (course.courseStartedOn && course.courseStartedAt) {
+        var cStart = new Date(course.courseStartedOn + 'T' + course.courseStartedAt).getTime();
+        courseUpdate.timeTaken = cpFmtDuration(t.ms - cStart);
+      }
+    }
+    var update = { email: window._learnerEmail || null, name: window._learnerEmail || null, courses: {} };
+    update.courses[CP_COURSE_ID] = courseUpdate;
+    ref.set(update, { merge: true })
+       .catch(function(e){ console.warn('[courseProgress] complete write failed:', e.message); });
+  }).catch(function(e){ console.warn('[courseProgress] complete read failed:', e.message); });
+}
+
+</script>
+</body>
+</html>
