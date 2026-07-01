@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<!-- ============================================================================
+     SF KNOWLEDGE HUB — Python for Robot Framework
+     Module 1 — Setup and the Python↔Robot bridge
+     EXAMPLE_ID = py-module-1-setup-and-bridge  (filename minus .html)
+     courseId   = ct52RngFePXF4BwHJ9mC
+     ============================================================================ -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 2 — Python fundamentals as keyword building blocks — Python for Robot Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#1a6eb5; --blue-dark:#0f4c81; --ink:#1f2933; --muted:#647687;
+    --bg:#eef2f8; --card:#ffffff; --border:#d6e0ee; --green:#16a34a; --coral:#c0392b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Source Sans 3',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;font-size:17px}
+  .userbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:var(--card);border-bottom:1px solid var(--border);font-size:14px}
+  .signout{padding:8px 16px;border:none;border-radius:6px;background:var(--blue);color:#fff;cursor:pointer;font-family:inherit}
+  .crumbs{padding:14px 24px;color:var(--muted);font-size:13px}
+  .crumbs a{color:var(--blue);text-decoration:none}
+  .wrap{max-width:860px;margin:0 auto;padding:8px 24px 80px}
+  h1{font-family:'Source Serif 4',Georgia,serif;font-size:30px;margin:8px 0 4px}
+  h2{font-family:'Source Serif 4',Georgia,serif;font-size:22px;margin:26px 0 6px}
+  .eyebrow{font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+  .advisory{font-family:'Source Code Pro',monospace;font-size:12px;color:var(--muted);background:#f4f8fd;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:14px 0}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+  .tag{font-family:'Source Code Pro',monospace;font-size:12px;background:#e3edf9;color:var(--blue-dark);padding:5px 10px;border-radius:14px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;margin:18px 0}
+  code{font-family:'Source Code Pro',monospace;font-size:.92em;background:#eef2f8;padding:1px 5px;border-radius:4px}
+  pre{background:#0f1b2d;color:#e6edf5;border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.55}
+  pre .cmt{color:#7f9cc0}
+  pre .sec{color:#7ec4ff;font-weight:600}
+  .filelabel{font-family:'Source Code Pro',monospace;font-size:12px;color:var(--muted);margin:14px 0 -8px;text-transform:none}
+  /* Collapsible primer — "Refresh your knowledge?" */
+  .primer{border:1px solid var(--border);border-radius:12px;margin:18px 0;overflow:hidden}
+  .primer summary{cursor:pointer;padding:14px 18px;background:#f4f8fd;font-weight:600;color:var(--blue-dark);list-style:none}
+  .primer summary::-webkit-details-marker{display:none}
+  .primer summary::before{content:'+ ';font-family:'Source Code Pro',monospace}
+  .primer[open] summary::before{content:'– '}
+  .primer .primer-body{padding:0 18px 16px}
+  /* Keyword annotation list */
+  .kwlist{margin:12px 0 0}
+  .kwlist dt{margin-top:12px}
+  .kwlist dt code{background:#e3edf9;color:var(--blue-dark)}
+  .kwlist dd{margin:4px 0 0 0}
+  .kwlist .kw-ex{display:block;margin-top:5px;font-family:'Source Code Pro',monospace;font-size:13px;color:#e6edf5;background:#0f1b2d;border-radius:6px;padding:7px 10px;white-space:pre;overflow-x:auto}
+  /* MCQ */
+  .q{margin:16px 0}
+  .q .stem{font-weight:600;margin-bottom:8px}
+  .opt{display:block;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:8px 0;cursor:pointer}
+  .opt input{margin-right:10px}
+  .submit-btn{padding:11px 20px;border:none;border-radius:8px;background:var(--blue);color:#fff;font-family:inherit;font-size:15px;cursor:pointer}
+  .submit-btn:disabled{background:#c3d3e6;cursor:not-allowed}
+  .submit-note{font-family:'Source Code Pro',monospace;font-size:13px;color:var(--muted);margin-top:8px}
+  .hidden{display:none}
+  .complete-bar{display:flex;align-items:center;gap:12px;border-top:1px solid var(--border);margin-top:22px;padding-top:18px}
+  .complete-bar.disabled{opacity:.5}
+  .complete-bar .redo-btn{margin-left:auto;display:none;border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit}
+  .complete-bar .redo-btn.visible{display:inline-block}
+  .complete-bar.done{color:var(--green)}
+  .nav-row{display:flex;justify-content:space-between;margin-top:30px}
+  .nav-btn{padding:12px 18px;border-radius:8px;background:var(--blue);color:#fff;text-decoration:none;font-weight:600}
+  .nav-btn.secondary{background:#fff;color:var(--blue);border:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="userbar">
+  <span>Welcome, <span id="userEmail">…</span></span>
+  <button class="signout" onclick="pmSignOut()">Sign out</button>
+</div>
+<div class="crumbs">
+  <a href="course-map.html">Back to course dashboard</a> / Module 2 / Python fundamentals as keyword building blocks
+</div>
+
+<div class="wrap">
+  <div class="eyebrow">Module 2</div>
+  <h1>Python fundamentals as keyword building blocks</h1>
+  <div class="tags">
+    <span class="tag">variables &amp; types</span>
+    <span class="tag">functions</span>
+    <span class="tag">conditionals</span>
+    <span class="tag">loops</span>
+  </div>
+
+  <div class="advisory">Examples run on Python 3.8+ with Robot Framework 7.4.2. Verify current versions on PyPI before installing.</div>
+
+  <div class="card">
+    <p>In Module 1 you saw one Python function become one keyword. Now you'll learn the Python that goes <em>inside</em> those functions — variables, arguments, conditionals, and loops — with every example written the way a tester writes it: a function that returns a value your <code>.robot</code> test then checks. Keep the same two files from Module 1 handy (a <code>.py</code> library and a <code>.robot</code> test); you'll add to them as you go.</p>
+  </div>
+
+  <!-- ===== CONCEPT 1: variables, types, return values ==================== -->
+  <h2>Variables, types, and the return value</h2>
+  <p>A variable is a name for a value. Python figures out the <em>type</em> from what you assign: text is a <code>str</code>, whole numbers are <code>int</code>, decimals are <code>float</code>, and true/false is a <code>bool</code>. For a tester, the value that matters most is the one a function hands back with <code>return</code> — that is what crosses the bridge into your test and becomes a Robot <code>${variable}</code>.</p>
+
+  <div class="filelabel">CheckoutLibrary.py</div>
+<pre><span class="cmt"># Returns a float — the test will capture it as ${total}.</span>
+def order_total(price, quantity):
+    <span class="cmt"># Robot passes both as strings; convert to the right types first.</span>
+    return float(price) * int(quantity)</pre>
+
+  <div class="filelabel">checkout_tests.robot</div>
+<pre><span class="sec">*** Settings ***</span>
+Library           CheckoutLibrary.py
+
+<span class="sec">*** Test Cases ***</span>
+Order Total Is Calculated
+    ${total}=    Order Total    19.99    3
+    Should Be Equal As Numbers    ${total}    59.97</pre>
+
+  <p>The keyword <strong>Order Total</strong> returns a number; the test captures it into <code>${total}</code> and asserts on it. Whatever type your function returns is the type your test receives.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — what a variable is</summary>
+    <div class="primer-body">
+      <p>A variable is a labelled box that holds a value, created by assigning with <code>=</code>, as in <code>price = 19.99</code>. The name on the left lets you reuse the value on the right without repeating it. Python is dynamically typed: you don't declare the type, it's inferred from the value, and the same name can later hold a different type. Common built-in types are <code>str</code> (text, in quotes), <code>int</code> (whole numbers), <code>float</code> (decimals), and <code>bool</code> (<code>True</code>/<code>False</code>).</p>
+    </div>
+  </details>
+
+  <!-- ===== CONCEPT 2: functions, arguments, defaults ==================== -->
+  <h2>Functions, arguments, and defaults</h2>
+  <p>A keyword's arguments are just the function's parameters. Python lets you give a parameter a <em>default</em>, so callers can omit it — and in Robot Framework that becomes an optional keyword argument. You can also pass arguments by name from a test using <code>name=value</code> syntax, which reads clearly for anyone maintaining the suite.</p>
+
+  <div class="filelabel">CheckoutLibrary.py  (add this)</div>
+<pre>def apply_discount(price, percent=0):
+    <span class="cmt"># percent defaults to 0 — no discount unless the caller passes one.</span>
+    price = float(price)
+    percent = float(percent)
+    return round(price - (price * percent / 100), 2)</pre>
+
+  <div class="filelabel">checkout_tests.robot  (add this)</div>
+<pre>No Discount By Default
+    ${final}=    Apply Discount    100
+    Should Be Equal As Numbers    ${final}    100.0
+
+Ten Percent Off
+    ${final}=    Apply Discount    100    percent=10
+    Should Be Equal As Numbers    ${final}    90.0</pre>
+
+  <p>The first test omits the discount and gets the default; the second names the argument <code>percent=10</code>. Same keyword, two call styles — this is how one Python function serves several test cases.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — function arguments</summary>
+    <div class="primer-body">
+      <p>Arguments are the inputs a function receives. In <code>def apply_discount(price, percent=0):</code>, <code>price</code> is required and <code>percent</code> has a default of <code>0</code>, so it's optional. You can pass arguments <em>positionally</em> (in order) or <em>by keyword</em> (<code>percent=10</code>, naming them). Defaults make a function flexible: callers supply only what differs from the common case. Robot Framework maps all of this directly onto keyword calls.</p>
+    </div>
+  </details>
+
+  <!-- ===== CONCEPT 3: conditionals ===================================== -->
+  <h2>Conditionals: returning a verdict</h2>
+  <p>Tests constantly ask "does this value meet the rule?" In Python you express that with <code>if</code>/<code>elif</code>/<code>else</code>, returning a result the test can act on. Comparisons (<code>==</code>, <code>!=</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>) produce a <code>bool</code>, and a function that returns a <code>bool</code> pairs naturally with Robot's <code>Should Be True</code>.</p>
+
+  <div class="filelabel">CheckoutLibrary.py  (add this)</div>
+<pre>def shipping_band(weight_kg):
+    weight = float(weight_kg)
+    if weight &lt;= 1:
+        return "light"
+    elif weight &lt;= 10:
+        return "standard"
+    else:
+        return "heavy"</pre>
+
+  <div class="filelabel">checkout_tests.robot  (add this)</div>
+<pre>Half A Kilo Is Light
+    ${band}=    Shipping Band    0.5
+    Should Be Equal    ${band}    light
+
+Five Kilos Is Standard
+    ${band}=    Shipping Band    5
+    Should Be Equal    ${band}    standard</pre>
+
+  <p>The keyword returns one of three strings depending on the input; each test asserts the band it expects. The decision logic lives in Python, and the test just states the expected outcome.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — booleans and comparisons</summary>
+    <div class="primer-body">
+      <p>A comparison asks a yes/no question and evaluates to a boolean: <code>5 &gt; 3</code> is <code>True</code>, <code>2 == 4</code> is <code>False</code>. The operators are <code>==</code> (equal), <code>!=</code> (not equal), and <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>. An <code>if</code> statement runs its block only when its condition is <code>True</code>; <code>elif</code> checks a further condition if earlier ones were <code>False</code>; <code>else</code> catches everything remaining. Note the double <code>==</code> for comparison versus single <code>=</code> for assignment.</p>
+    </div>
+  </details>
+
+  <!-- ===== CONCEPT 4: loops ============================================ -->
+  <h2>Loops: building a result from many items</h2>
+  <p>When a test works over many values — several prices, a batch of records — a loop lets one keyword process them all and return a single summarizing result. <code>for</code> repeats once per item in a collection; <code>while</code> repeats as long as a condition holds. Most test logic uses <code>for</code>.</p>
+
+  <div class="filelabel">CheckoutLibrary.py  (add this)</div>
+<pre>def cart_total(prices):
+    <span class="cmt"># prices arrives as a Python list from the test.</span>
+    total = 0.0
+    for price in prices:
+        total = total + float(price)
+    return round(total, 2)</pre>
+
+  <div class="filelabel">checkout_tests.robot  (add this)</div>
+<pre><span class="sec">*** Test Cases ***</span>
+Cart Total Sums All Items
+    ${prices}=    Create List    10.00    5.50    4.50
+    ${sum}=    Cart Total    ${prices}
+    Should Be Equal As Numbers    ${sum}    20.0</pre>
+
+  <p>The built-in keyword <code>Create List</code> builds a Robot list; the test passes it to <strong>Cart Total</strong>, whose <code>for</code> loop adds every item and returns the sum. One keyword, any number of prices.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — iteration</summary>
+    <div class="primer-body">
+      <p>Iteration means doing something once for each item in a collection. <code>for price in prices:</code> takes each element of <code>prices</code> in turn, binds it to <code>price</code>, and runs the indented block. A running variable (here <code>total</code>) accumulates a result across the passes. A <code>while</code> loop instead repeats as long as a condition stays <code>True</code>, so you must ensure the condition eventually becomes <code>False</code> or the loop never ends.</p>
+    </div>
+  </details>
+
+  <!-- ===== CHECK YOUR KNOWLEDGE (MCQ) =================================== -->
+  <div id="questionsWrap" class="card">
+    <div class="eyebrow">Check your knowledge</div>
+
+    <div class="q">
+      <div class="stem">Q1. A Python function returns a <code>float</code>. What does the Robot test receive when it captures the result into a variable?</div>
+      <label class="opt"><input type="radio" name="q1" value="A">A float value</label>
+      <label class="opt"><input type="radio" name="q1" value="B">Always a string, regardless of what was returned</label>
+      <label class="opt"><input type="radio" name="q1" value="C">Nothing — return values can't cross into Robot</label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q2. In <code>def apply_discount(price, percent=0):</code>, which is true of <code>percent</code>?</div>
+      <label class="opt"><input type="radio" name="q2" value="A">It is required and must always be passed</label>
+      <label class="opt"><input type="radio" name="q2" value="B">It is optional and defaults to 0 if omitted</label>
+      <label class="opt"><input type="radio" name="q2" value="C">It can only be passed positionally, never by name</label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q3. Why do these keyword functions call <code>float()</code> or <code>int()</code> on their arguments?</div>
+      <label class="opt"><input type="radio" name="q3" value="A">Robot Framework passes arguments as strings, so they must be converted before arithmetic</label>
+      <label class="opt"><input type="radio" name="q3" value="B">Python cannot store numbers without conversion</label>
+      <label class="opt"><input type="radio" name="q3" value="C">It is only needed for negative numbers</label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q4. Which operator compares two values for equality (rather than assigning)?</div>
+      <label class="opt"><input type="radio" name="q4" value="A"><code>=</code></label>
+      <label class="opt"><input type="radio" name="q4" value="B"><code>==</code></label>
+      <label class="opt"><input type="radio" name="q4" value="C"><code>=&gt;</code></label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q5. In <code>for price in prices:</code>, what is <code>price</code> on each pass of the loop?</div>
+      <label class="opt"><input type="radio" name="q5" value="A">The whole list each time</label>
+      <label class="opt"><input type="radio" name="q5" value="B">One item from <code>prices</code>, in turn</label>
+      <label class="opt"><input type="radio" name="q5" value="C">The number of items in <code>prices</code></label>
+    </div>
+
+    <button class="submit-btn" id="submitAnswersBtn" disabled>Submit answers</button>
+    <div class="submit-note" id="submitNote">Select an answer for each question to submit.</div>
+  </div>
+
+  <div id="submittedWrap" class="card hidden">
+    <p>Answers submitted. Review complete — mark this module as complete below.</p>
+  </div>
+
+  <div class="complete-bar disabled" id="completeBar">
+    <input type="checkbox" id="completeCb" disabled>
+    <label for="completeCb" id="completeLabel">Answer all questions to unlock</label>
+    <button class="redo-btn" id="redoBtn">&#x21BA; Redo module</button>
+  </div>
+
+  <div class="nav-row">
+    <a class="nav-btn secondary" href="py-module-1-setup-and-bridge.html">← Module 1</a>
+    <a class="nav-btn" href="py-module-3-data-structures.html">Module 3 →</a>
+  </div>
+</div>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+/* ===== IDENTIFIERS — set at creation ====================================== */
+const EXAMPLE_ID = 'py-module-2-fundamentals-as-keywords';   // = filename minus .html
+const CORRECT = { q1:'A', q2:'B', q3:'A', q4:'B', q5:'B' };
+
+/* ===== Firebase init ====================================================== */
+const _FB_CONFIG = {
+  apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain: "sfcertification-grafana.firebaseapp.com",
+  projectId: "sfcertification-grafana",
+  storageBucket: "sfcertification-grafana.firebasestorage.app",
+  messagingSenderId: "227322696511",
+  appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+if (!window._fbApp) window._fbApp = firebase.initializeApp(_FB_CONFIG);
+const _auth = firebase.auth(window._fbApp);
+window._learnerUid = 'anon'; window._learnerEmail = null;
+
+window.pmLearnerKey = function(exampleId){ return 'pm_learner_' + window._learnerUid + '_' + exampleId; };
+function loadState(){ try { return JSON.parse(localStorage.getItem(window.pmLearnerKey(EXAMPLE_ID))) || {}; } catch(e){ return {}; } }
+function saveState(s){ localStorage.setItem(window.pmLearnerKey(EXAMPLE_ID), JSON.stringify(s)); }
+
+window.pmSignOut = function(){ _auth.signOut(); };
+
+_auth.onAuthStateChanged(function(user){
+  if (user && user.email && user.email.endsWith('@sourcefuse.com')) {
+    window._learnerUid = user.uid; window._learnerEmail = user.email;
+    document.getElementById('userEmail').textContent = user.email;
+    document.dispatchEvent(new Event('learnerReady'));
+  } else if (user && user.email && !user.email.endsWith('@sourcefuse.com')) {
+    _auth.signOut();    // enforce domain
+  } else {
+    window.location.href = 'course-map.html';
+  }
+});
+
+/* ===== Page init — bind complete handler BEFORE early returns ============== */
+document.addEventListener('learnerReady', function() {
+  const state = loadState();
+  cpEnsureModuleStarted();
+
+  const completeCb = document.getElementById('completeCb');
+  if (completeCb) {
+    completeCb.addEventListener('change', function() {
+      if (!completeCb.checked) return;
+      const s = loadState(); s.complete = true; saveState(s);
+      activateCompleteBar(true);
+    });
+  }
+  const redoBtn = document.getElementById('redoBtn');
+  if (redoBtn) redoBtn.addEventListener('click', function() {
+    localStorage.removeItem(window.pmLearnerKey(EXAMPLE_ID));
+    document.getElementById('questionsWrap').classList.remove('hidden');
+    document.getElementById('submittedWrap').classList.add('hidden');
+    document.querySelectorAll('.opt input[type="radio"]').forEach(function(r){ r.checked = false; });
+    document.getElementById('submitAnswersBtn').disabled = true;
+    document.getElementById('submitNote').textContent = 'Select an answer for each question to submit.';
+    activateCompleteBar(false);
+  });
+
+  if (state.complete) { showSubmittedState(); activateCompleteBar(true); return; }
+  if (state.submittedAt) { showSubmittedState(); activateCompleteBar(false); return; }
+
+  document.querySelectorAll('.opt input[type="radio"]').forEach(function(radio){
+    radio.addEventListener('change', checkAllAnswered);
+  });
+  document.getElementById('submitAnswersBtn').addEventListener('click', submitAnswers);
+});
+
+const Q_NAMES = ['q1','q2','q3','q4','q5'];
+
+function checkAllAnswered() {
+  const all = Q_NAMES.every(n => document.querySelector('input[name="'+n+'"]:checked'));
+  document.getElementById('submitAnswersBtn').disabled = !all;
+  document.getElementById('submitNote').textContent = all ? 'Ready to submit.' : 'Select an answer for each question to submit.';
+}
+
+function submitAnswers() {
+  const answers = {};
+  Q_NAMES.forEach(function(n){
+    const v = document.querySelector('input[name="'+n+'"]:checked'); if (v) answers[n] = v.value;
+  });
+  let correct = 0;
+  Object.keys(CORRECT).forEach(function(n){ if (answers[n] === CORRECT[n]) correct++; });
+  const s = loadState();
+  s.exampleId = EXAMPLE_ID; s.answers = answers; s.correct = correct;
+  s.submittedAt = new Date().toISOString();
+  saveState(s);
+  showSubmittedState();
+  activateCompleteBar(false);
+}
+
+function showSubmittedState() {
+  document.getElementById('questionsWrap').classList.add('hidden');
+  document.getElementById('submittedWrap').classList.remove('hidden');
+}
+
+function activateCompleteBar(isDone) {
+  const bar = document.getElementById('completeBar');
+  const cb = document.getElementById('completeCb');
+  const label = document.getElementById('completeLabel');
+  const redo = document.getElementById('redoBtn');
+  if (!bar) return;
+  if (isDone) {
+    bar.className = 'complete-bar done';
+    cb.disabled = true; cb.checked = true;
+    label.textContent = '✓ Module complete';
+    if (redo) redo.classList.add('visible');
+    cpWriteModuleComplete();
+  } else {
+    bar.className = 'complete-bar';
+    cb.disabled = false; cb.checked = false;
+    label.textContent = 'Mark module as complete';
+    if (redo) redo.classList.remove('visible');
+  }
+}
+
+</script>
+
+<!-- ===== SHARED courseProgress v2 wiring ==================================== -->
+<script>
+/* --- CONFIG --- */
+var CP_COURSE_ID = 'ct52RngFePXF4BwHJ9mC';
+var THIS_MODULE_KEY = EXAMPLE_ID;
+var CP_MODULE_IDS = [
+  'py-module-1-setup-and-bridge',
+  'py-module-2-fundamentals-as-keywords',
+  'py-module-3-data-structures',
+  'py-module-4-custom-library-and-suite'
+];
+
+/* --- function bodies from courseProgress-v2.js --- */
+function cpNow() {
+  var d = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return {
+    date: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),
+    time: pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),
+    ms:   d.getTime()
+  };
+}
+function cpFmtDuration(ms) {
+  if (ms == null || ms < 0) return null;
+  var s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  if (h > 0) return h+'h '+m+'m '+sec+'s';
+  if (m > 0) return m+'m '+sec+'s';
+  return sec+'s';
+}
+function cpDb() { return firebase.firestore(window._fbApp); }
+function cpDocRef() { return cpDb().collection('courseProgress').doc(window._learnerUid); }
+function cpReady() { return window._fbApp && window._learnerUid && window._learnerUid !== 'anon'; }
+
+function cpEnsureModuleStarted() {
+  if (!cpReady()) return;
+  var ref = cpDocRef();
+  ref.get().then(function(snap){
+    var data = snap.exists ? (snap.data() || {}) : {};
+    var course = (data.courses && data.courses[CP_COURSE_ID]) || {};
+    var mods = course.modules || {};
+    var t = cpNow();
+    var update = { email: window._learnerEmail || null, name: window._learnerEmail || null, courses: {} };
+    update.courses[CP_COURSE_ID] = { moduleInProgress: THIS_MODULE_KEY, modules: {} };
+    if (!mods[THIS_MODULE_KEY] || !mods[THIS_MODULE_KEY].startedOn) {
+      update.courses[CP_COURSE_ID].modules[THIS_MODULE_KEY] = { startedOn: t.date, startedAt: t.time };
+    }
+    if (!course.courseStartedOn) { update.courses[CP_COURSE_ID].courseStartedOn = t.date; update.courses[CP_COURSE_ID].courseStartedAt = t.time; }
+    ref.set(update, { merge: true })
+       .catch(function(e){ console.warn('[courseProgress] start write failed:', e.message); });
+  }).catch(function(e){ console.warn('[courseProgress] start read failed:', e.message); });
+}
+
+function cpWriteModuleComplete() {
+  if (!cpReady()) return;
+  var ref = cpDocRef();
+  ref.get().then(function(snap){
+    var data = snap.exists ? (snap.data() || {}) : {};
+    var course = (data.courses && data.courses[CP_COURSE_ID]) || {};
+    var mods = course.modules || {};
+    var t = cpNow();
+    var startMs = null;
+    var mEntry = mods[THIS_MODULE_KEY];
+    if (mEntry && mEntry.startedOn && mEntry.startedAt) {
+      startMs = new Date(mEntry.startedOn + 'T' + mEntry.startedAt).getTime();
+    }
+    var moduleTimeTaken = startMs != null ? cpFmtDuration(t.ms - startMs) : null;
+
+    var courseUpdate = { modules: {} };
+    var existing = mods[THIS_MODULE_KEY] || {};
+    courseUpdate.modules[THIS_MODULE_KEY] = {
+      completedOn: existing.completedOn || t.date,
+      completedAt: existing.completedAt || t.time,
+      timeTaken:   existing.timeTaken   || moduleTimeTaken
+    };
+    if (course.moduleInProgress === THIS_MODULE_KEY) courseUpdate.moduleInProgress = null;
+
+    var completedCount = 0;
+    CP_MODULE_IDS.forEach(function(id){
+      if (id === THIS_MODULE_KEY) { completedCount++; return; }
+      if (mods[id] && mods[id].completedOn) completedCount++;
+    });
+    if (completedCount >= CP_MODULE_IDS.length && !course.courseCompletedOn) {
+      courseUpdate.courseCompletedOn = t.date;
+      courseUpdate.courseCompletedAt = t.time;
+      if (course.courseStartedOn && course.courseStartedAt) {
+        var cStart = new Date(course.courseStartedOn + 'T' + course.courseStartedAt).getTime();
+        courseUpdate.timeTaken = cpFmtDuration(t.ms - cStart);
+      }
+    }
+    var update = { email: window._learnerEmail || null, name: window._learnerEmail || null, courses: {} };
+    update.courses[CP_COURSE_ID] = courseUpdate;
+    ref.set(update, { merge: true })
+       .catch(function(e){ console.warn('[courseProgress] complete write failed:', e.message); });
+  }).catch(function(e){ console.warn('[courseProgress] complete read failed:', e.message); });
+}
+
+</script>
+</body>
+</html>
