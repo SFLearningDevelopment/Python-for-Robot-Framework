@@ -42,6 +42,12 @@
   .primer summary::before{content:'+ ';font-family:'Source Code Pro',monospace}
   .primer[open] summary::before{content:'– '}
   .primer .primer-body{padding:0 18px 16px}
+  /* Keyword annotation list */
+  .kwlist{margin:12px 0 0}
+  .kwlist dt{margin-top:12px}
+  .kwlist dt code{background:#e3edf9;color:var(--blue-dark)}
+  .kwlist dd{margin:4px 0 0 0}
+  .kwlist .kw-ex{display:block;margin-top:5px;font-family:'Source Code Pro',monospace;font-size:13px;color:#e6edf5;background:#0f1b2d;border-radius:6px;padding:7px 10px;white-space:pre;overflow-x:auto}
   /* MCQ */
   .q{margin:16px 0}
   .q .stem{font-weight:600;margin-bottom:8px}
@@ -94,7 +100,22 @@
   <details class="primer">
     <summary>Refresh your knowledge? — what a test automation framework is</summary>
     <div class="primer-body">
-      <p>A test automation framework gives you a structure for writing, organizing, and running tests automatically instead of clicking through an application by hand. It handles the repetitive parts — running each test, recording pass or fail, and producing a report — so you can focus on describing <em>what</em> to check. Robot Framework's particular style is <strong>keyword-driven</strong>: each test is a sequence of named actions (keywords) that read almost like plain instructions. For example, <code>Open Browser</code>, <code>Input Text</code>, <code>Click Button</code>, and <code>Page Should Contain</code> are all keywords — you read them top to bottom and can tell what the test does without knowing any code. Some, like <code>Log</code> and <code>Should Be Equal</code>, are built into Robot Framework; others, like <code>Open Browser</code>, come from a library you import.</p>
+      <p>A test automation framework gives you a structure for writing, organizing, and running tests automatically instead of clicking through an application by hand. It handles the repetitive parts — running each test, recording pass or fail, and producing a report — so you can focus on describing <em>what</em> to check. Robot Framework's particular style is <strong>keyword-driven</strong>: each test is a sequence of named actions (keywords) that read almost like plain instructions.</p>
+      <p>You read keywords top to bottom and can tell what a test does without knowing any code. Some are built into Robot Framework (like <code>Log</code> and <code>Should Be Equal</code>); others come from a library you import (like <code>Open Browser</code>). Here are a few common ones, each shown in use:</p>
+      <dl class="kwlist">
+        <dt><code>Log</code></dt>
+        <dd>Writes a message to the test log. <span class="kw-ex">Log&nbsp;&nbsp;&nbsp;&nbsp;Order total was 250</span></dd>
+        <dt><code>Should Be Equal</code></dt>
+        <dd>Fails the test unless two values match. <span class="kw-ex">Should Be Equal&nbsp;&nbsp;&nbsp;&nbsp;${status}&nbsp;&nbsp;&nbsp;&nbsp;PASS</span></dd>
+        <dt><code>Open Browser</code></dt>
+        <dd>Opens a browser at a URL (from a library). <span class="kw-ex">Open Browser&nbsp;&nbsp;&nbsp;&nbsp;https://example.com&nbsp;&nbsp;&nbsp;&nbsp;chrome</span></dd>
+        <dt><code>Input Text</code></dt>
+        <dd>Types text into a field found by a locator. <span class="kw-ex">Input Text&nbsp;&nbsp;&nbsp;&nbsp;id=username&nbsp;&nbsp;&nbsp;&nbsp;demo</span></dd>
+        <dt><code>Click Button</code></dt>
+        <dd>Clicks a button found by a locator. <span class="kw-ex">Click Button&nbsp;&nbsp;&nbsp;&nbsp;id=login</span></dd>
+        <dt><code>Page Should Contain</code></dt>
+        <dd>Fails unless the given text appears on the page. <span class="kw-ex">Page Should Contain&nbsp;&nbsp;&nbsp;&nbsp;Welcome back</span></dd>
+      </dl>
     </div>
   </details>
 
