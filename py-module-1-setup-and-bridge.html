@@ -48,6 +48,10 @@
   .kwlist dt code{background:#e3edf9;color:var(--blue-dark)}
   .kwlist dd{margin:4px 0 0 0}
   .kwlist .kw-ex{display:block;margin-top:5px;font-family:'Source Code Pro',monospace;font-size:13px;color:#e6edf5;background:#0f1b2d;border-radius:6px;padding:7px 10px;white-space:pre;overflow-x:auto}
+  /* Numbered build steps */
+  .steps{margin:14px 0;padding-left:0;list-style:none;counter-reset:step}
+  .steps li{position:relative;padding:2px 0 12px 40px;margin:0}
+  .steps li::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:0;width:26px;height:26px;border-radius:50%;background:var(--blue);color:#fff;font-family:'Source Code Pro',monospace;font-size:14px;display:flex;align-items:center;justify-content:center}
   /* MCQ */
   .q{margin:16px 0}
   .q .stem{font-weight:600;margin-bottom:8px}
@@ -175,7 +179,15 @@ Greeting Is Logged
 
   <!-- ===== CONCEPT 4: The bridge ======================================== -->
   <h2>The bridge: a Python function becomes a keyword</h2>
-  <p>This is the core of the course. A Python file is a <em>library</em>; each function in it becomes a keyword whose name is the function name with underscores read as spaces. You import the library in <strong>Settings</strong>, then call the function as a keyword in a test. Create two files in the same folder.</p>
+  <p>This is the core of the course. A Python file is a <em>library</em>: each function in it becomes a keyword, and Robot Framework reads the underscores in the function name as spaces (so <code>add_numbers</code> becomes the keyword <strong>Add Numbers</strong>). Follow these steps.</p>
+
+  <ol class="steps">
+    <li>Pick a working folder for this module — anything works, for example <code>~/robot-course/module1</code> on macOS/Linux or <code>C:\robot-course\module1</code> on Windows. Create it and open your terminal there with <code>cd</code>.</li>
+    <li>In that folder, create a Python file named <code>MathLibrary.py</code> with the code below. This is your library.</li>
+    <li>In the <em>same folder</em>, create a Robot file named <code>bridge_tests.robot</code> with the code below. The two files must sit side by side so the import can find the library by filename.</li>
+    <li>Import the library by adding <code>Library&nbsp;&nbsp;&nbsp;&nbsp;MathLibrary.py</code> under the <code>*** Settings ***</code> section of the <code>.robot</code> file — "Settings" here means that section header, not any application setting.</li>
+    <li>Run the test from that folder with <code>robot bridge_tests.robot</code>.</li>
+  </ol>
 
   <div class="filelabel">MathLibrary.py</div>
 <pre><span class="cmt"># Each function here becomes a Robot Framework keyword.</span>
@@ -192,7 +204,7 @@ Adding Two Numbers Works
     ${result}=    Add Numbers    2    3
     Should Be Equal As Integers    ${result}    5</pre>
 
-  <p>Run it with <code>robot bridge_tests.robot</code>. The function <code>add_numbers</code> became the keyword <strong>Add Numbers</strong>; the test called it, captured the return value into the variable <code>${result}</code>, and asserted on it. You just wrote Python and drove it from a Robot test. Every remaining module builds on exactly this move — richer Python, returning richer results, driven by more structured suites.</p>
+  <p>When you run it, the function <code>add_numbers</code> is called as the keyword <strong>Add Numbers</strong>; the test captures its return value into the variable <code>${result}</code> and asserts on it. If Robot reports <code>No keyword with name 'Add Numbers' found</code>, the two files aren't in the same folder or the <code>Library</code> line doesn't match the Python filename. You just wrote Python and drove it from a Robot test. Every remaining module builds on exactly this move — richer Python, returning richer results, driven by more structured suites.</p>
 
   <details class="primer">
     <summary>Refresh your knowledge? — what a function is</summary>
