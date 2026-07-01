@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<!-- ============================================================================
+     SF KNOWLEDGE HUB — Python for Robot Framework
+     Module 1 — Setup and the Python↔Robot bridge
+     EXAMPLE_ID = py-module-1-setup-and-bridge  (filename minus .html)
+     courseId   = ct52RngFePXF4BwHJ9mC
+     ============================================================================ -->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Module 1 — Setup and the Python↔Robot bridge — Python for Robot Framework</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue:#1a6eb5; --blue-dark:#0f4c81; --ink:#1f2933; --muted:#647687;
+    --bg:#eef2f8; --card:#ffffff; --border:#d6e0ee; --green:#16a34a; --coral:#c0392b;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Source Sans 3',system-ui,sans-serif;color:var(--ink);background:var(--bg);line-height:1.6;font-size:17px}
+  .userbar{display:flex;justify-content:space-between;align-items:center;padding:12px 24px;background:var(--card);border-bottom:1px solid var(--border);font-size:14px}
+  .signout{padding:8px 16px;border:none;border-radius:6px;background:var(--blue);color:#fff;cursor:pointer;font-family:inherit}
+  .crumbs{padding:14px 24px;color:var(--muted);font-size:13px}
+  .crumbs a{color:var(--blue);text-decoration:none}
+  .wrap{max-width:860px;margin:0 auto;padding:8px 24px 80px}
+  h1{font-family:'Source Serif 4',Georgia,serif;font-size:30px;margin:8px 0 4px}
+  h2{font-family:'Source Serif 4',Georgia,serif;font-size:22px;margin:26px 0 6px}
+  .eyebrow{font-family:'Source Code Pro',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+  .advisory{font-family:'Source Code Pro',monospace;font-size:12px;color:var(--muted);background:#f4f8fd;border:1px solid var(--border);border-radius:8px;padding:10px 14px;margin:14px 0}
+  .tags{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
+  .tag{font-family:'Source Code Pro',monospace;font-size:12px;background:#e3edf9;color:var(--blue-dark);padding:5px 10px;border-radius:14px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:22px;margin:18px 0}
+  code{font-family:'Source Code Pro',monospace;font-size:.92em;background:#eef2f8;padding:1px 5px;border-radius:4px}
+  pre{background:#0f1b2d;color:#e6edf5;border-radius:10px;padding:16px 18px;overflow-x:auto;font-family:'Source Code Pro',monospace;font-size:14px;line-height:1.55}
+  pre .cmt{color:#7f9cc0}
+  pre .sec{color:#7ec4ff;font-weight:600}
+  .filelabel{font-family:'Source Code Pro',monospace;font-size:12px;color:var(--muted);margin:14px 0 -8px;text-transform:none}
+  /* Collapsible primer — "Refresh your knowledge?" */
+  .primer{border:1px solid var(--border);border-radius:12px;margin:18px 0;overflow:hidden}
+  .primer summary{cursor:pointer;padding:14px 18px;background:#f4f8fd;font-weight:600;color:var(--blue-dark);list-style:none}
+  .primer summary::-webkit-details-marker{display:none}
+  .primer summary::before{content:'+ ';font-family:'Source Code Pro',monospace}
+  .primer[open] summary::before{content:'– '}
+  .primer .primer-body{padding:0 18px 16px}
+  /* MCQ */
+  .q{margin:16px 0}
+  .q .stem{font-weight:600;margin-bottom:8px}
+  .opt{display:block;border:1px solid var(--border);border-radius:8px;padding:12px 14px;margin:8px 0;cursor:pointer}
+  .opt input{margin-right:10px}
+  .submit-btn{padding:11px 20px;border:none;border-radius:8px;background:var(--blue);color:#fff;font-family:inherit;font-size:15px;cursor:pointer}
+  .submit-btn:disabled{background:#c3d3e6;cursor:not-allowed}
+  .submit-note{font-family:'Source Code Pro',monospace;font-size:13px;color:var(--muted);margin-top:8px}
+  .hidden{display:none}
+  .complete-bar{display:flex;align-items:center;gap:12px;border-top:1px solid var(--border);margin-top:22px;padding-top:18px}
+  .complete-bar.disabled{opacity:.5}
+  .complete-bar .redo-btn{margin-left:auto;display:none;border:1px solid var(--border);background:#fff;border-radius:8px;padding:8px 14px;cursor:pointer;font-family:inherit}
+  .complete-bar .redo-btn.visible{display:inline-block}
+  .complete-bar.done{color:var(--green)}
+  .nav-row{display:flex;justify-content:space-between;margin-top:30px}
+  .nav-btn{padding:12px 18px;border-radius:8px;background:var(--blue);color:#fff;text-decoration:none;font-weight:600}
+  .nav-btn.secondary{background:#fff;color:var(--blue);border:1px solid var(--border)}
+</style>
+</head>
+<body>
+
+<div class="userbar">
+  <span>Welcome, <span id="userEmail">…</span></span>
+  <button class="signout" onclick="pmSignOut()">Sign out</button>
+</div>
+<div class="crumbs">
+  <a href="course-map.html">Back to course dashboard</a> / Module 1 / Setup and the Python↔Robot bridge
+</div>
+
+<div class="wrap">
+  <div class="eyebrow">Module 1</div>
+  <h1>Setup and the Python↔Robot bridge</h1>
+  <div class="tags">
+    <span class="tag">robotframework 7.4.2</span>
+    <span class="tag">python 3.8+</span>
+    <span class="tag">first keyword</span>
+  </div>
+
+  <div class="advisory">Versions accurate as of 1 July 2026. Robot Framework 7.4.2 requires Python 3.8 or newer. Run <code>robot --version</code> after installing and check PyPI if you need the current release.</div>
+
+  <div class="card">
+    <p>Your goal in this module is small and concrete: get a working environment, run a real Robot Framework test, and prove the one idea the whole course rests on — that a plain Python function can become a Robot keyword you call from a <code>.robot</code> file. Once you can see your own Python running as a keyword, everything after this is just adding depth.</p>
+    <p>You will not write much Python here. You will install the tools, run a test that already works, then write four lines of Python and watch Robot Framework call them. That connection is the through-line of the course.</p>
+  </div>
+
+  <!-- ===== CONCEPT 1: Where Python sits in Robot Framework =============== -->
+  <h2>Where Python fits</h2>
+  <p>Robot Framework is a test automation framework built in Python. You write tests in a readable, table-style syntax made of <em>keywords</em>. Some keywords are built in (<code>Log</code>, <code>Should Be Equal</code>); others come from libraries. When the built-in and library keywords aren't enough, you write your own — and the primary language for writing them is Python. That is where you come in as a tester: Python is how you extend Robot Framework with logic specific to your system under test.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — what a test automation framework is</summary>
+    <div class="primer-body">
+      <p>A test automation framework gives you a structure for writing, organizing, and running tests automatically instead of clicking through an application by hand. It handles the repetitive parts — running each test, recording pass or fail, and producing a report — so you can focus on describing <em>what</em> to check. Robot Framework's particular style is <strong>keyword-driven</strong>: each test is a sequence of named actions (keywords) that read almost like plain instructions.</p>
+    </div>
+  </details>
+
+  <!-- ===== CONCEPT 2: Install and verify ================================= -->
+  <h2>Install and verify</h2>
+  <p>Robot Framework installs from PyPI with pip. Installing it also gives you the <code>robot</code> command that runs your tests. Confirm the version before you go further — a mismatched Python or Robot version is the most common reason a first test won't run.</p>
+
+  <div class="filelabel">terminal</div>
+<pre><span class="cmt"># Check your Python — must be 3.8 or newer</span>
+python --version
+
+<span class="cmt"># Install Robot Framework (also installs the `robot` command)</span>
+pip install robotframework
+
+<span class="cmt"># Confirm the framework installed</span>
+robot --version
+<span class="cmt"># e.g. Robot Framework 7.4.2 (Python 3.12.x on ...)</span></pre>
+
+  <p>Later in the course you'll use an ecosystem library for browser testing. You don't need it yet, but this is how such a library installs — as a separate pip package that adds more keywords:</p>
+  <div class="filelabel">terminal</div>
+<pre><span class="cmt"># You will use this in Module 4 — no need to run it now</span>
+pip install robotframework-seleniumlibrary</pre>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — pip and virtual environments</summary>
+    <div class="primer-body">
+      <p><code>pip</code> is Python's package installer; it fetches libraries from PyPI (the Python Package Index) and makes them available to your Python. A <strong>virtual environment</strong> is an isolated Python setup for one project, so its packages don't collide with another project's. Create and activate one with <code>python -m venv venv</code> then <code>source venv/bin/activate</code> (macOS/Linux) or <code>venv\Scripts\activate</code> (Windows). Installing Robot Framework inside an activated venv keeps this course's tools separate from everything else on your machine.</p>
+    </div>
+  </details>
+
+  <!-- ===== CONCEPT 3: Your first .robot file ============================ -->
+  <h2>Your first <code>.robot</code> file</h2>
+  <p>A Robot Framework test lives in a plain-text <code>.robot</code> file organized into sections marked by <code>*** ... ***</code> headers. The three you'll use constantly are <strong>Settings</strong> (imports and configuration), <strong>Test Cases</strong> (the tests themselves), and <strong>Keywords</strong> (your own reusable actions). Here is a complete, runnable test that uses only built-in keywords.</p>
+
+  <div class="filelabel">first_tests.robot</div>
+<pre><span class="sec">*** Settings ***</span>
+Documentation     My first Robot Framework suite.
+
+<span class="sec">*** Test Cases ***</span>
+Greeting Is Logged
+    Log    Hello from Robot Framework
+    Should Be Equal    ${1}    ${1}</pre>
+
+  <p>Notice the spacing: Robot Framework separates a keyword from its arguments with <strong>two or more spaces</strong>. A single space is read as part of the same value. This trips up almost everyone once. Run the file from the terminal:</p>
+
+  <div class="filelabel">terminal</div>
+<pre>robot first_tests.robot</pre>
+
+  <p>Robot Framework prints a pass/fail summary and writes three files into the current folder: <code>log.html</code> (step-by-step detail), <code>report.html</code> (high-level result), and <code>output.xml</code> (machine-readable). Open <code>log.html</code> to see your <code>Log</code> message and each keyword's status. Reading these reports is how you'll diagnose every future test.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — the command line</summary>
+    <div class="primer-body">
+      <p>The command line (terminal on macOS/Linux, Command Prompt or PowerShell on Windows) lets you type commands instead of clicking. You run a program by typing its name and pressing Enter; <code>cd foldername</code> moves into a folder, and <code>ls</code> (macOS/Linux) or <code>dir</code> (Windows) lists what's there. Robot Framework tests are launched this way with the <code>robot</code> command, so you'll want to <code>cd</code> into the folder holding your <code>.robot</code> file first.</p>
+    </div>
+  </details>
+
+  <!-- ===== CONCEPT 4: The bridge ======================================== -->
+  <h2>The bridge: a Python function becomes a keyword</h2>
+  <p>This is the core of the course. A Python file is a <em>library</em>; each function in it becomes a keyword whose name is the function name with underscores read as spaces. You import the library in <strong>Settings</strong>, then call the function as a keyword in a test. Create two files in the same folder.</p>
+
+  <div class="filelabel">MathLibrary.py</div>
+<pre><span class="cmt"># Each function here becomes a Robot Framework keyword.</span>
+def add_numbers(a, b):
+    <span class="cmt"># Robot passes arguments as strings — convert before adding.</span>
+    return int(a) + int(b)</pre>
+
+  <div class="filelabel">bridge_tests.robot</div>
+<pre><span class="sec">*** Settings ***</span>
+Library           MathLibrary.py
+
+<span class="sec">*** Test Cases ***</span>
+Adding Two Numbers Works
+    ${result}=    Add Numbers    2    3
+    Should Be Equal As Integers    ${result}    5</pre>
+
+  <p>Run it with <code>robot bridge_tests.robot</code>. The function <code>add_numbers</code> became the keyword <strong>Add Numbers</strong>; the test called it, captured the return value into the variable <code>${result}</code>, and asserted on it. You just wrote Python and drove it from a Robot test. Every remaining module builds on exactly this move — richer Python, returning richer results, driven by more structured suites.</p>
+
+  <details class="primer">
+    <summary>Refresh your knowledge? — what a function is</summary>
+    <div class="primer-body">
+      <p>A function is a named, reusable block of code that can take inputs (arguments) and hand back a result with <code>return</code>. In <code>def add_numbers(a, b):</code>, the name is <code>add_numbers</code> and <code>a</code> and <code>b</code> are its arguments. Calling <code>add_numbers(2, 3)</code> runs the block and gives back <code>5</code>. In Robot Framework, that returned value is what a test captures into a <code>${variable}</code> and checks — so the <code>return</code> statement is the hand-off point between your Python and your test.</p>
+    </div>
+  </details>
+
+  <!-- ===== CHECK YOUR KNOWLEDGE (MCQ) =================================== -->
+  <div id="questionsWrap" class="card">
+    <div class="eyebrow">Check your knowledge</div>
+
+    <div class="q">
+      <div class="stem">Q1. Which command installs Robot Framework and gives you the <code>robot</code> command?</div>
+      <label class="opt"><input type="radio" name="q1" value="A">pip install robotframework</label>
+      <label class="opt"><input type="radio" name="q1" value="B">robot --install framework</label>
+      <label class="opt"><input type="radio" name="q1" value="C">python get robotframework</label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q2. In a <code>.robot</code> file, which three section headers were introduced in this module?</div>
+      <label class="opt"><input type="radio" name="q2" value="A">Imports, Steps, Assertions</label>
+      <label class="opt"><input type="radio" name="q2" value="B">Settings, Test Cases, Keywords</label>
+      <label class="opt"><input type="radio" name="q2" value="C">Config, Tests, Functions</label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q3. A Python function named <code>add_numbers</code> in an imported library is called from a test as which keyword?</div>
+      <label class="opt"><input type="radio" name="q3" value="A">add_numbers</label>
+      <label class="opt"><input type="radio" name="q3" value="B">AddNumbers</label>
+      <label class="opt"><input type="radio" name="q3" value="C">Add Numbers</label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q4. Why does <code>add_numbers</code> convert its arguments with <code>int()</code> before adding?</div>
+      <label class="opt"><input type="radio" name="q4" value="A">Robot Framework passes arguments as strings by default</label>
+      <label class="opt"><input type="radio" name="q4" value="B">Python cannot add numbers without int()</label>
+      <label class="opt"><input type="radio" name="q4" value="C">int() makes the keyword run faster</label>
+    </div>
+
+    <div class="q">
+      <div class="stem">Q5. Which file should you open to see each keyword's step-by-step status after a run?</div>
+      <label class="opt"><input type="radio" name="q5" value="A">output.xml</label>
+      <label class="opt"><input type="radio" name="q5" value="B">log.html</label>
+      <label class="opt"><input type="radio" name="q5" value="C">settings.robot</label>
+    </div>
+
+    <button class="submit-btn" id="submitAnswersBtn" disabled>Submit answers</button>
+    <div class="submit-note" id="submitNote">Select an answer for each question to submit.</div>
+  </div>
+
+  <div id="submittedWrap" class="card hidden">
+    <p>Answers submitted. Review complete — mark this module as complete below.</p>
+  </div>
+
+  <div class="complete-bar disabled" id="completeBar">
+    <input type="checkbox" id="completeCb" disabled>
+    <label for="completeCb" id="completeLabel">Answer all questions to unlock</label>
+    <button class="redo-btn" id="redoBtn">&#x21BA; Redo module</button>
+  </div>
+
+  <div class="nav-row">
+    <a class="nav-btn secondary" href="course-map.html">← Course dashboard</a>
+    <a class="nav-btn" href="py-module-2-fundamentals-as-keywords.html">Module 2 →</a>
+  </div>
+</div>
+
+<!-- Firebase compat SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script>
+/* ===== IDENTIFIERS — set at creation ====================================== */
+const EXAMPLE_ID = 'py-module-1-setup-and-bridge';   // = filename minus .html
+const CORRECT = { q1:'A', q2:'B', q3:'C', q4:'A', q5:'B' };
+
+/* ===== Firebase init ====================================================== */
+const _FB_CONFIG = {
+  apiKey: "AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q",
+  authDomain: "sfcertification-grafana.firebaseapp.com",
+  projectId: "sfcertification-grafana",
+  storageBucket: "sfcertification-grafana.firebasestorage.app",
+  messagingSenderId: "227322696511",
+  appId: "1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+if (!window._fbApp) window._fbApp = firebase.initializeApp(_FB_CONFIG);
+const _auth = firebase.auth(window._fbApp);
+window._learnerUid = 'anon'; window._learnerEmail = null;
+
+window.pmLearnerKey = function(exampleId){ return 'pm_learner_' + window._learnerUid + '_' + exampleId; };
+function loadState(){ try { return JSON.parse(localStorage.getItem(window.pmLearnerKey(EXAMPLE_ID))) || {}; } catch(e){ return {}; } }
+function saveState(s){ localStorage.setItem(window.pmLearnerKey(EXAMPLE_ID), JSON.stringify(s)); }
+
+window.pmSignOut = function(){ _auth.signOut(); };
+
+_auth.onAuthStateChanged(function(user){
+  if (user && user.email && user.email.endsWith('@sourcefuse.com')) {
+    window._learnerUid = user.uid; window._learnerEmail = user.email;
+    document.getElementById('userEmail').textContent = user.email;
+    document.dispatchEvent(new Event('learnerReady'));
+  } else if (user && user.email && !user.email.endsWith('@sourcefuse.com')) {
+    _auth.signOut();    // enforce domain
+  } else {
+    window.location.href = 'course-map.html';
+  }
+});
+
+/* ===== Page init — bind complete handler BEFORE early returns ============== */
+document.addEventListener('learnerReady', function() {
+  const state = loadState();
+  cpEnsureModuleStarted();
+
+  const completeCb = document.getElementById('completeCb');
+  if (completeCb) {
+    completeCb.addEventListener('change', function() {
+      if (!completeCb.checked) return;
+      const s = loadState(); s.complete = true; saveState(s);
+      activateCompleteBar(true);
+    });
+  }
+  const redoBtn = document.getElementById('redoBtn');
+  if (redoBtn) redoBtn.addEventListener('click', function() {
+    localStorage.removeItem(window.pmLearnerKey(EXAMPLE_ID));
+    document.getElementById('questionsWrap').classList.remove('hidden');
+    document.getElementById('submittedWrap').classList.add('hidden');
+    document.querySelectorAll('.opt input[type="radio"]').forEach(function(r){ r.checked = false; });
+    document.getElementById('submitAnswersBtn').disabled = true;
+    document.getElementById('submitNote').textContent = 'Select an answer for each question to submit.';
+    activateCompleteBar(false);
+  });
+
+  if (state.complete) { showSubmittedState(); activateCompleteBar(true); return; }
+  if (state.submittedAt) { showSubmittedState(); activateCompleteBar(false); return; }
+
+  document.querySelectorAll('.opt input[type="radio"]').forEach(function(radio){
+    radio.addEventListener('change', checkAllAnswered);
+  });
+  document.getElementById('submitAnswersBtn').addEventListener('click', submitAnswers);
+});
+
+const Q_NAMES = ['q1','q2','q3','q4','q5'];
+
+function checkAllAnswered() {
+  const all = Q_NAMES.every(n => document.querySelector('input[name="'+n+'"]:checked'));
+  document.getElementById('submitAnswersBtn').disabled = !all;
+  document.getElementById('submitNote').textContent = all ? 'Ready to submit.' : 'Select an answer for each question to submit.';
+}
+
+function submitAnswers() {
+  const answers = {};
+  Q_NAMES.forEach(function(n){
+    const v = document.querySelector('input[name="'+n+'"]:checked'); if (v) answers[n] = v.value;
+  });
+  let correct = 0;
+  Object.keys(CORRECT).forEach(function(n){ if (answers[n] === CORRECT[n]) correct++; });
+  const s = loadState();
+  s.exampleId = EXAMPLE_ID; s.answers = answers; s.correct = correct;
+  s.submittedAt = new Date().toISOString();
+  saveState(s);
+  showSubmittedState();
+  activateCompleteBar(false);
+}
+
+function showSubmittedState() {
+  document.getElementById('questionsWrap').classList.add('hidden');
+  document.getElementById('submittedWrap').classList.remove('hidden');
+}
+
+function activateCompleteBar(isDone) {
+  const bar = document.getElementById('completeBar');
+  const cb = document.getElementById('completeCb');
+  const label = document.getElementById('completeLabel');
+  const redo = document.getElementById('redoBtn');
+  if (!bar) return;
+  if (isDone) {
+    bar.className = 'complete-bar done';
+    cb.disabled = true; cb.checked = true;
+    label.textContent = '✓ Module complete';
+    if (redo) redo.classList.add('visible');
+    cpWriteModuleComplete();
+  } else {
+    bar.className = 'complete-bar';
+    cb.disabled = false; cb.checked = false;
+    label.textContent = 'Mark module as complete';
+    if (redo) redo.classList.remove('visible');
+  }
+}
+</script>
+
+<!-- ===== SHARED courseProgress v2 wiring ==================================== -->
+<script>
+/* --- CONFIG --- */
+var CP_COURSE_ID = 'ct52RngFePXF4BwHJ9mC';
+var THIS_MODULE_KEY = EXAMPLE_ID;
+var CP_MODULE_IDS = [
+  'py-module-1-setup-and-bridge',
+  'py-module-2-fundamentals-as-keywords',
+  'py-module-3-data-structures',
+  'py-module-4-custom-library-and-suite'
+];
+
+/* --- function bodies from courseProgress-v2.js --- */
+function cpNow() {
+  var d = new Date();
+  var pad = function(n){ return String(n).padStart(2,'0'); };
+  return {
+    date: d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()),
+    time: pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds()),
+    ms:   d.getTime()
+  };
+}
+function cpFmtDuration(ms) {
+  if (ms == null || ms < 0) return null;
+  var s = Math.floor(ms/1000), h = Math.floor(s/3600), m = Math.floor((s%3600)/60), sec = s%60;
+  if (h > 0) return h+'h '+m+'m '+sec+'s';
+  if (m > 0) return m+'m '+sec+'s';
+  return sec+'s';
+}
+function cpDb() { return firebase.firestore(window._fbApp); }
+function cpDocRef() { return cpDb().collection('courseProgress').doc(window._learnerUid); }
+function cpReady() { return window._fbApp && window._learnerUid && window._learnerUid !== 'anon'; }
+
+function cpEnsureModuleStarted() {
+  if (!cpReady()) return;
+  var ref = cpDocRef();
+  ref.get().then(function(snap){
+    var data = snap.exists ? (snap.data() || {}) : {};
+    var course = (data.courses && data.courses[CP_COURSE_ID]) || {};
+    var mods = course.modules || {};
+    var t = cpNow();
+    var update = { email: window._learnerEmail || null, name: window._learnerEmail || null, courses: {} };
+    update.courses[CP_COURSE_ID] = { moduleInProgress: THIS_MODULE_KEY, modules: {} };
+    if (!mods[THIS_MODULE_KEY] || !mods[THIS_MODULE_KEY].startedOn) {
+      update.courses[CP_COURSE_ID].modules[THIS_MODULE_KEY] = { startedOn: t.date, startedAt: t.time };
+    }
+    if (!course.courseStartedOn) { update.courses[CP_COURSE_ID].courseStartedOn = t.date; update.courses[CP_COURSE_ID].courseStartedAt = t.time; }
+    ref.set(update, { merge: true })
+       .catch(function(e){ console.warn('[courseProgress] start write failed:', e.message); });
+  }).catch(function(e){ console.warn('[courseProgress] start read failed:', e.message); });
+}
+
+function cpWriteModuleComplete() {
+  if (!cpReady()) return;
+  var ref = cpDocRef();
+  ref.get().then(function(snap){
+    var data = snap.exists ? (snap.data() || {}) : {};
+    var course = (data.courses && data.courses[CP_COURSE_ID]) || {};
+    var mods = course.modules || {};
+    var t = cpNow();
+    var startMs = null;
+    var mEntry = mods[THIS_MODULE_KEY];
+    if (mEntry && mEntry.startedOn && mEntry.startedAt) {
+      startMs = new Date(mEntry.startedOn + 'T' + mEntry.startedAt).getTime();
+    }
+    var moduleTimeTaken = startMs != null ? cpFmtDuration(t.ms - startMs) : null;
+
+    var courseUpdate = { modules: {} };
+    var existing = mods[THIS_MODULE_KEY] || {};
+    courseUpdate.modules[THIS_MODULE_KEY] = {
+      completedOn: existing.completedOn || t.date,
+      completedAt: existing.completedAt || t.time,
+      timeTaken:   existing.timeTaken   || moduleTimeTaken
+    };
+    if (course.moduleInProgress === THIS_MODULE_KEY) courseUpdate.moduleInProgress = null;
+
+    var completedCount = 0;
+    CP_MODULE_IDS.forEach(function(id){
+      if (id === THIS_MODULE_KEY) { completedCount++; return; }
+      if (mods[id] && mods[id].completedOn) completedCount++;
+    });
+    if (completedCount >= CP_MODULE_IDS.length && !course.courseCompletedOn) {
+      courseUpdate.courseCompletedOn = t.date;
+      courseUpdate.courseCompletedAt = t.time;
+      if (course.courseStartedOn && course.courseStartedAt) {
+        var cStart = new Date(course.courseStartedOn + 'T' + course.courseStartedAt).getTime();
+        courseUpdate.timeTaken = cpFmtDuration(t.ms - cStart);
+      }
+    }
+    var update = { email: window._learnerEmail || null, name: window._learnerEmail || null, courses: {} };
+    update.courses[CP_COURSE_ID] = courseUpdate;
+    ref.set(update, { merge: true })
+       .catch(function(e){ console.warn('[courseProgress] complete write failed:', e.message); });
+  }).catch(function(e){ console.warn('[courseProgress] complete read failed:', e.message); });
+}
+</script>
+</body>
+</html>
