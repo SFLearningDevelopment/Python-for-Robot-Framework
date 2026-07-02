@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<!-- ============================================================================
+     SF KNOWLEDGE HUB — TYPE 1 CERTIFICATION EXAM TEMPLATE
+     Model: Claude for PM certification-test.html.
+     Writes attempts to:
+       courseExamResults/{email}/courses/{courseId}/attempts/{auto-id}
+     IMPORTANT: learner email is resolved from the authenticated Firebase user
+     (currentUser, IndexedDB-backed → durable across tabs), NOT from sessionStorage.
+     ============================================================================ -->
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SF Certified Python for Robot Framework Practitioner — Exam</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;600;700&family=Source+Code+Pro:wght@400;600&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--blue:#1a6eb5;--ink:#1f2933;--muted:#647687;--bg:#eef2f8;--card:#fff;--border:#d6e0ee;--green:#16a34a}
+  *{box-sizing:border-box}
+  body{margin:0;font-family:'Source Sans 3',sans-serif;color:var(--ink);background:var(--bg)}
+  .wrap{max-width:780px;margin:0 auto;padding:28px}
+  h1{font-family:'Source Serif 4',serif}
+  .start-btn{display:block;width:100%;padding:13px;border:none;border-radius:8px;background:var(--blue);color:#fff;font-size:16px;font-family:inherit;cursor:pointer}
+  .attempt-info{font-family:'Source Code Pro',monospace;color:var(--muted);margin:10px 0}
+  .q{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:18px;margin:14px 0}
+  .opt{display:block;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:8px 0;cursor:pointer}
+  .hidden{display:none}
+  .timer{position:sticky;top:0;background:var(--bg);padding:10px 0;font-family:'Source Code Pro',monospace;font-weight:600;color:var(--blue)}
+  .timer.warn{color:#c0392b}
+  .opt{display:block;border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin:8px 0;cursor:pointer}
+  .opt input{margin-right:10px}
+  .qnum{font-family:'Source Code Pro',monospace;font-size:12px;color:var(--muted)}
+  .stem{font-weight:600;margin:4px 0 10px}
+  .exam-submit{display:block;width:100%;padding:13px;border:none;border-radius:8px;background:var(--green);color:#fff;font-size:16px;font-family:inherit;cursor:pointer;margin-top:10px}
+  .exam-submit:disabled{background:#c3d3e6;cursor:not-allowed}
+  .result{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:26px;text-align:center}
+  .result .score{font-family:'Source Serif 4',serif;font-size:40px;margin:6px 0}
+  .result .verdict{font-weight:700;font-size:20px}
+  .result .verdict.pass{color:var(--green)}
+  .result .verdict.fail{color:#c0392b}
+  .result a{color:var(--blue);font-weight:700;text-decoration:none}
+  .note{font-family:'Source Code Pro',monospace;font-size:13px;color:var(--muted);margin-top:8px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="startScreen">
+    <h1>SF Certified Python for Robot Framework Practitioner</h1>
+    <p>20 questions drawn from a bank of 24 · 70% pass · 30 min · 3 attempts.</p>
+    <div class="attempt-info" id="attemptInfo"></div>
+    <button class="start-btn" id="startBtn">Begin exam →</button>
+
+    <!-- TEMP: re-sync local result to Firestore (remove after validation) -->
+    <button class="start-btn" id="resyncBtn" style="margin-top:12px;background:#475569;">Re-sync my exam results</button>
+    <div id="resyncStatus" style="margin-top:12px;font-family:'Source Code Pro',monospace;font-size:13px;"></div>
+  </div>
+
+  <div id="examScreen" class="hidden"><!-- questions injected here --></div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="question-bank.js"></script>
+<script>
+const COURSE_ID = 'ct52RngFePXF4BwHJ9mC';
+const PASS_MARK = 0.70;       // e.g. 0.75
+const STORAGE_KEY = 'pm_cert_exam';
+
+const _FB_CONFIG = {
+  apiKey:"AIzaSyC-I-IOCq2fCwa471fsD5xOn6SYQSBDp7Q", authDomain:"sfcertification-grafana.firebaseapp.com",
+  projectId:"sfcertification-grafana", storageBucket:"sfcertification-grafana.firebasestorage.app",
+  messagingSenderId:"227322696511", appId:"1:227322696511:web:12e7ced7dd3d45fa06798a"
+};
+if (!window._pmCertApp) window._pmCertApp = firebase.initializeApp(_FB_CONFIG);
+window._pmCertAuth = firebase.auth(window._pmCertApp);
+window._pmCertDb   = firebase.firestore(window._pmCertApp);
+
+window._pmCertAuth.onAuthStateChanged(function(u){
+  if (u && u.email && !u.email.endsWith('@sourcefuse.com')) window._pmCertAuth.signOut();
+});
+
+/* ===== Firestore write — email from authenticated user (NOT sessionStorage) === */
+window.pmCertSaveResult = async function(attemptData) {
+  try {
+    let email = (window._pmCertAuth && window._pmCertAuth.currentUser && window._pmCertAuth.currentUser.email) || null;
+    if (!email && window._pmCertAuth) {
+      email = await new Promise(function(resolve){
+        const unsub = window._pmCertAuth.onAuthStateChanged(function(u){ unsub(); resolve(u && u.email ? u.email : null); });
+      });
+    }
+    if (!email) {
+      const session = JSON.parse(sessionStorage.getItem('pm_session') || '{}');
+      email = session.email || window._learnerEmail || null;
+    }
+    if (!email) { console.warn('[Cert] No learner email — skipping write'); return { ok:false, reason:'no-email' }; }
+    const safeEmail = email.toLowerCase().trim();
+    await window._pmCertDb.collection('courseExamResults').doc(safeEmail)
+          .collection('courses').doc(COURSE_ID)
+          .collection('attempts').add(Object.assign({ email:safeEmail, courseId:COURSE_ID }, attemptData));
+    console.log('[Cert] saved for', safeEmail);
+    return { ok:true, email:safeEmail };
+  } catch(e) { console.warn('[Cert] write failed:', e.message); return { ok:false, reason:e.message }; }
+};
+
+/* ===== TEMP re-sync button (remove after validation) ===================== */
+(function(){
+  const btn=document.getElementById('resyncBtn'), status=document.getElementById('resyncStatus');
+  if(!btn) return;
+  btn.addEventListener('click', async function(){
+    status.style.color='#475569'; status.textContent='Re-syncing…';
+    try{
+      const st=JSON.parse(localStorage.getItem(STORAGE_KEY)||'null');
+      if(!st||!st.attempts||!st.attempts.length){ status.style.color='#c0392b'; status.textContent='No local attempt found.'; return; }
+      const i=st.attempts.length-1, a=st.attempts[i];
+      const pct=(typeof a.pct==='number')?a.pct:(a.correct/20);
+      const rec={ attemptNumber:i+1, correct:a.correct, total:20, pct:pct, pass:pct>=PASS_MARK,
+                  submittedAt:a.submittedAt||new Date().toISOString(),
+                  durationSeconds:(typeof a.durationSeconds==='number')?a.durationSeconds:null,
+                  timeUp:!!a.timeUp, answers:Object.assign({},a.answers||{}), questions:[] };
+      const res=await window.pmCertSaveResult(rec);
+      if(res&&res.ok){ status.style.color='#16a34a'; status.textContent='✓ Saved for '+res.email+'. Check the Exam Results display.'; }
+      else { status.style.color='#c0392b'; status.textContent='Did not save: '+((res&&res.reason)||'unknown'); }
+    }catch(e){ status.style.color='#c0392b'; status.textContent='Re-sync failed: '+e.message; }
+  });
+})();
+
+/* ===== Exam runtime ===================================================== */
+const DRAW_COUNT = 20;          // questions per attempt
+const MAX_ATTEMPTS = 3;
+const TIME_LIMIT_SECONDS = 30 * 60;
+
+function loadExamState(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || { attempts:[] }; } catch(e){ return { attempts:[] }; } }
+function saveExamState(s){ localStorage.setItem(STORAGE_KEY, JSON.stringify(s)); }
+
+let _drawn = [];        // questions for the current attempt
+let _startMs = 0;
+let _timerId = null;
+let _submitted = false;
+
+function shuffle(arr){
+  const a = arr.slice();
+  for (let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+  return a;
+}
+
+function renderAttemptInfo(){
+  const st = loadExamState();
+  const used = st.attempts.length;
+  const remaining = MAX_ATTEMPTS - used;
+  const info = document.getElementById('attemptInfo');
+  const startBtn = document.getElementById('startBtn');
+  const passed = st.attempts.some(function(a){ return a.pass; });
+  if (passed){
+    info.innerHTML = 'You have already passed this exam. <a href="course-map.html">Return to the dashboard</a>.';
+    startBtn.disabled = true; startBtn.style.background = '#c3d3e6'; startBtn.style.cursor = 'not-allowed';
+    startBtn.textContent = 'Exam passed ✓';
+    return;
+  }
+  if (remaining <= 0){
+    info.innerHTML = 'You have used all ' + MAX_ATTEMPTS + ' attempts. <a href="course-map.html">Return to the dashboard</a>.';
+    startBtn.disabled = true; startBtn.style.background = '#c3d3e6'; startBtn.style.cursor = 'not-allowed';
+    startBtn.textContent = 'No attempts remaining';
+    return;
+  }
+  info.textContent = 'Attempt ' + (used+1) + ' of ' + MAX_ATTEMPTS + ' · ' + remaining + ' remaining.';
+}
+
+function startExam(){
+  const bank = window.QUESTION_BANK || [];
+  if (!bank.length){ alert('Question bank failed to load.'); return; }
+  _drawn = shuffle(bank).slice(0, Math.min(DRAW_COUNT, bank.length));
+  _submitted = false;
+  document.getElementById('startScreen').classList.add('hidden');
+  const screen = document.getElementById('examScreen');
+  screen.classList.remove('hidden');
+
+  let html = '<div class="timer" id="timer">Time remaining: 30:00</div>';
+  _drawn.forEach(function(q, i){
+    html += '<div class="q"><div class="qnum">Question ' + (i+1) + ' of ' + _drawn.length + '</div>' +
+            '<div class="stem">' + q.stem + '</div>';
+    Object.keys(q.options).forEach(function(L){
+      html += '<label class="opt"><input type="radio" name="ex_' + i + '" value="' + L + '">' + q.options[L] + '</label>';
+    });
+    html += '</div>';
+  });
+  html += '<button class="exam-submit" id="examSubmitBtn">Submit exam</button>' +
+          '<div class="note" id="examNote">You can submit at any time; unanswered questions count as incorrect.</div>';
+  screen.innerHTML = html;
+
+  document.getElementById('examSubmitBtn').addEventListener('click', function(){ finishExam(false); });
+
+  _startMs = Date.now();
+  startTimer();
+  window.scrollTo(0,0);
+}
+
+function startTimer(){
+  const el = document.getElementById('timer');
+  function tick(){
+    const elapsed = Math.floor((Date.now() - _startMs)/1000);
+    const left = TIME_LIMIT_SECONDS - elapsed;
+    if (left <= 0){ el.textContent = 'Time remaining: 0:00'; finishExam(true); return; }
+    const m = Math.floor(left/60), s = left % 60;
+    el.textContent = 'Time remaining: ' + m + ':' + (s<10?'0':'') + s;
+    if (left <= 60) el.classList.add('warn');
+  }
+  tick();
+  _timerId = setInterval(tick, 1000);
+}
+
+function finishExam(timeUp){
+  if (_submitted) return;
+  _submitted = true;
+  if (_timerId) clearInterval(_timerId);
+
+  const answers = {};
+  let correct = 0;
+  _drawn.forEach(function(q, i){
+    const sel = document.querySelector('input[name="ex_' + i + '"]:checked');
+    const val = sel ? sel.value : null;
+    answers[q.id] = val;
+    if (val === q.correct) correct++;
+  });
+  const total = _drawn.length;
+  const pct = correct / total;
+  const pass = pct >= PASS_MARK;
+  const durationSeconds = Math.floor((Date.now() - _startMs)/1000);
+  const submittedAt = new Date().toISOString();
+
+  // record attempt locally
+  const st = loadExamState();
+  const attemptNumber = st.attempts.length + 1;
+  st.attempts.push({ attemptNumber:attemptNumber, correct:correct, total:total, pct:pct, pass:pass,
+                     submittedAt:submittedAt, durationSeconds:durationSeconds, timeUp:!!timeUp, answers:answers });
+  saveExamState(st);
+
+  // write to Firestore (schema identical to the re-sync rec)
+  const rec = { attemptNumber:attemptNumber, correct:correct, total:total, pct:pct, pass:pass,
+                submittedAt:submittedAt, durationSeconds:durationSeconds, timeUp:!!timeUp,
+                answers:Object.assign({}, answers), questions:[] };
+  window.pmCertSaveResult(rec);
+
+  showResult(correct, total, pct, pass, timeUp);
+}
+
+function showResult(correct, total, pct, pass, timeUp){
+  const st = loadExamState();
+  const remaining = MAX_ATTEMPTS - st.attempts.length;
+  const screen = document.getElementById('examScreen');
+  let html = '<div class="result">';
+  html += '<div class="qnum">' + (timeUp ? 'Time expired — exam auto-submitted' : 'Exam submitted') + '</div>';
+  html += '<div class="score">' + correct + ' / ' + total + '</div>';
+  html += '<div class="verdict ' + (pass?'pass':'fail') + '">' + (pass ? 'PASS ✓' : 'Not passed') + '</div>';
+  html += '<p class="note">' + Math.round(pct*100) + '% · pass mark 70%</p>';
+  if (pass){
+    html += '<p>Congratulations — you have earned the SF Certified Python for Robot Framework Practitioner certification.</p>';
+  } else if (remaining > 0){
+    html += '<p>You have ' + remaining + ' attempt' + (remaining===1?'':'s') + ' remaining.</p>' +
+            '<button class="start-btn" onclick="location.reload()">Try again →</button>';
+  } else {
+    html += '<p>You have used all attempts for this exam.</p>';
+  }
+  html += '<p style="margin-top:16px"><a href="course-map.html">← Back to course dashboard</a></p>';
+  html += '</div>';
+  screen.innerHTML = html;
+  window.scrollTo(0,0);
+}
+
+/* ===== wire up on load ===== */
+(function(){
+  const startBtn = document.getElementById('startBtn');
+  if (startBtn) startBtn.addEventListener('click', startExam);
+  renderAttemptInfo();
+})();
+</script>
+</body>
+</html>
